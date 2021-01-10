@@ -1,0 +1,29 @@
+name: CD
+on: [release]
+jobs:
+  web-deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: install
+      - uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: build
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
+      - name: cdn publish
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          server: cdn.neo4jlabs.com
+          username: ${{ secrets.ftp_username }}
+          password: ${{ secrets.ftp_password }}
+          local-dir: ./dist
+          server-dir: ${{ secrets.public_dir }}/neovis.js/${{ steps.package-version.outputs.current-version }}/
+      - name: npm publish
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
