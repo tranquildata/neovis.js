@@ -116,16 +116,33 @@ export default class NeoVis {
 	 * @returns {{}}
 	 */
 	async buildNodeVisObject(neo4jNode) {
-		let node = {};
-		let label = neo4jNode.labels[0];
-
-		let labelConfig = this._config && this._config.labels && (this._config.labels[label] || this._config.labels[NEOVIS_DEFAULT_CONFIG]);
+        let node = {};
+        let label = neo4jNode.labels[0];
+        let labelConfig = this._config && this._config.labels && this._config.labels[NEOVIS_DEFAULT_CONFIG];
+        let configuredLabels = this._config && this._config.labels;
+        console.log("config = " + this._config)
+        console.log("config.labels = " + this._config.labels)
+        if (configuredLabels !== undefined) {
+            for (var i = 0 ; i < neo4jNode.labels.length ; i++) {
+                console.log("picking labels from: " + neo4jNode.labels)
+                console.log("configured labels: " + Object.keys(configuredLabels))
+                //@TODO: prioritize labels higher in the list
+                if (configuredLabels[neo4jNode.labels[i]] !== undefined) {
+                    label = neo4jNode.labels[i];
+                    labelConfig = configuredLabels[label];
+                    break;
+                }
+            }
+        }
+        console.log("label = " + label)
+        console.log("labelConfig = " + labelConfig)
 
 		const captionKey = labelConfig && labelConfig['caption'];
 		const sizeKey = labelConfig && labelConfig['size'];
 		const sizeCypher = labelConfig && labelConfig['sizeCypher'];
 		const communityKey = labelConfig && labelConfig['community'];
-		const imageUrl = labelConfig && labelConfig['image'];
+        const imageUrl = labelConfig && labelConfig['image'];
+        const shapeName = labelConfig && labelConfig['shape'];
 		const font = labelConfig && labelConfig['font'];
 
 		const title_properties = (
@@ -216,7 +233,9 @@ export default class NeoVis {
 		// set node shape and image url if a image url is provided in config
 		if (imageUrl) {
 			node.shape = 'image';
-			node.image = imageUrl;
+            node.image = imageUrl;
+        } else if (shapeName) {
+            node.shape = shapeName;
 		} else {
 			node.shape = 'dot';
 		}
@@ -375,7 +394,7 @@ export default class NeoVis {
 							nodes: {
 								//shape: 'dot',
 								font: {
-									size: 26,
+									size: 12,
 									strokeWidth: 7
 								},
 								scaling: {
