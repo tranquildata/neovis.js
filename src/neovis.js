@@ -143,14 +143,19 @@ export default class NeoVis {
 		const communityKey = labelConfig && labelConfig['community'];
         const imageUrl = labelConfig && labelConfig['image'];
         const shapeName = labelConfig && labelConfig['shape'];
-		const font = labelConfig && labelConfig['font'];
+        const font = labelConfig && labelConfig['font'];
+        const color = labelConfig && labelConfig['color'];
 
 		const title_properties = (
 			labelConfig && labelConfig.title_properties
 		) || Object.keys(neo4jNode.properties);
 
 		node.id = neo4jNode.identity.toInt();
-		node.raw = neo4jNode;
+        node.raw = neo4jNode;
+        
+        if (color !== undefined) {
+            node.color = color;
+        }
 
 		// node size
 
@@ -257,7 +262,8 @@ export default class NeoVis {
 		const nodeTypeConfig = this._config && this._config.relationships &&
 			(this._config.relationships[r.type] || this._config.relationships[NEOVIS_DEFAULT_CONFIG]);
 		let weightKey = nodeTypeConfig && nodeTypeConfig.thickness,
-			captionKey = nodeTypeConfig && nodeTypeConfig.caption;
+            captionKey = nodeTypeConfig && nodeTypeConfig.caption,
+            dashes = nodeTypeConfig && nodeTypeConfig.dashes;
 
 		let edge = {};
 		edge.id = r.identity.toInt();
@@ -299,7 +305,11 @@ export default class NeoVis {
 			}
 		} else {
 			edge.label = r.type;
-		}
+        }
+        
+        if (dashes) {
+            edge.dashes = true
+        }
 		return edge;
 	}
 
